@@ -1,0 +1,4 @@
+[submodule "nips"]
+	path = nips
+	url = https://github.com/nostr-protocol/nips.git
+	branch = master

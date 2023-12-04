@@ -1,3 +1,5 @@
 #![cfg_attr(not(test), no_std)]
+#![feature(generic_arg_infer)]
 
-mod utils;
+pub mod base;
+pub mod utils;

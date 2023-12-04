@@ -1,3 +1,6 @@
+mod sha2;
+pub use sha2::sha2_256;
+
 pub struct Exact<T>(T);
 
 impl<T> Exact<T> {

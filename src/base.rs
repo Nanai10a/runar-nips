@@ -2,3 +2,6 @@
 
 mod array_string;
 pub use array_string::astr;
+
+mod array_vec;
+pub use array_vec::FixedVec;

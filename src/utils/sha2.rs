@@ -24,21 +24,17 @@ const ROUND: [word; 64] = [
 ];
 
 // ref: https://en.wikipedia.org/wiki/SHA-2#Pseudocode
-pub fn sha2_256<T: AsRef<[byte]>>(t: T) -> [byte; 32] {
-    let data = t.as_ref();
+pub fn sha2_256<T: IntoIterator<Item = byte>>(t: T) -> [byte; 32] {
+    let data = t.into_iter();
 
-    let len = data.len();
+    let len = core::cell::Cell::new(0);
 
     let pad_head = 0b10000000;
 
-    let pad_zero_len = (-1 - len as isize).rem_euclid(CHUNK_LEN as isize) - 8;
-    let pad_zero = core::iter::repeat(0b00000000).take(pad_zero_len as usize);
+    let pad_zero = PadZero::uninit(&len, CHUNK_LEN);
+    let pad_len = PadLen::uninit(&len);
 
-    let pad_len = u64::to_be_bytes((len * 8) as _);
-
-    let padded = data
-        .iter()
-        .copied()
+    let padded = counting(&len, data)
         .chain([pad_head])
         .chain(pad_zero)
         .chain(pad_len);
@@ -118,4 +114,75 @@ pub fn sha2_256<T: AsRef<[byte]>>(t: T) -> [byte; 32] {
     }
 
     result
+}
+
+fn counting<'a, I: Iterator + 'a>(
+    count: &'a core::cell::Cell<u64>,
+    iter: I,
+) -> impl Iterator<Item = I::Item> + 'a {
+    iter.inspect(|_| {
+        count.update(|c| c + 1);
+    })
+}
+
+enum PadZero<'a> {
+    Uninit {
+        src_len: &'a core::cell::Cell<u64>,
+        chk_len: usize,
+    },
+    Init {
+        iter: core::iter::Take<core::iter::Repeat<byte>>,
+    },
+}
+
+impl<'a> PadZero<'a> {
+    fn uninit(src_len: &'a core::cell::Cell<u64>, chk_len: usize) -> Self {
+        Self::Uninit { src_len, chk_len }
+    }
+}
+
+impl<'a> Iterator for PadZero<'a> {
+    type Item = byte;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            Self::Uninit { src_len, chk_len } => {
+                let src_len = src_len.get() as isize;
+                let chk_len = *chk_len as isize;
+
+                let pad_zero_len = (-1 - src_len).rem_euclid(chk_len) - 8;
+                let iter = core::iter::repeat(0b00000000).take(pad_zero_len as usize);
+
+                *self = Self::Init { iter };
+                self.next()
+            },
+            Self::Init { iter } => iter.next(),
+        }
+    }
+}
+
+enum PadLen<'a> {
+    Uninit { src_len: &'a core::cell::Cell<u64> },
+    Init { iter: core::array::IntoIter<u8, 8> },
+}
+
+impl<'a> PadLen<'a> {
+    fn uninit(src_len: &'a core::cell::Cell<u64>) -> Self { Self::Uninit { src_len } }
+}
+
+impl<'a> Iterator for PadLen<'a> {
+    type Item = byte;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            Self::Uninit { src_len } => {
+                let src_len = src_len.get() * 8;
+                let iter = src_len.to_be_bytes().into_iter();
+
+                *self = Self::Init { iter };
+                self.next()
+            },
+            Self::Init { iter } => iter.next(),
+        }
+    }
 }

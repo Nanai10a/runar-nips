@@ -5,3 +5,6 @@ pub use array_string::astr;
 
 mod array_vec;
 pub use array_vec::FixedVec;
+
+mod uri;
+pub use uri::Uri;

@@ -48,10 +48,38 @@ impl<'a> Uri<'a> {
     }
 }
 
-impl<'a> Serialize for Uri<'a> {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        todo!()
+impl<'a> core::fmt::Display for Uri<'a> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let Self {
+            scheme,
+            authority,
+            path,
+            query,
+            fragment,
+        } = self;
+
+        write!(f, "{}:", scheme)?;
+
+        if let Some(authority) = authority {
+            write!(f, "//{}", authority)?;
+        }
+
+        write!(f, "{}", path)?;
+
+        if let Some(query) = query {
+            write!(f, "?{}", query)?;
+        }
+
+        if let Some(fragment) = fragment {
+            write!(f, "#{}", fragment)?;
+        }
+
+        Ok(())
     }
+}
+
+impl<'a> Serialize for Uri<'a> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { todo!() }
 }
 
 impl<'de> Deserialize<'de> for Uri<'de> {

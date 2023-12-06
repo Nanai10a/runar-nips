@@ -29,6 +29,14 @@ impl<const LEN: usize, T> FixedVec<T, LEN> {
     }
 }
 
+impl<const LEN: usize, T> IntoIterator for FixedVec<T, LEN> {
+    type Item = T;
+
+    type IntoIter = impl Iterator<Item = T>;
+
+    fn into_iter(self) -> Self::IntoIter { self.0.into_iter().filter_map(Option::into) }
+}
+
 impl<const LEN: usize, T: serde::Serialize> serde::Serialize for FixedVec<T, LEN> {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.0[..self.len()].serialize(serializer)

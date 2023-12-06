@@ -21,6 +21,14 @@ impl<const LEN: usize> astr<LEN> {
     pub fn is_empty(&self) -> bool { self.len == 0 }
 }
 
+impl<const LEN: usize> IntoIterator for astr<LEN> {
+    type Item = u8;
+
+    type IntoIter = impl Iterator<Item = u8>;
+
+    fn into_iter(self) -> Self::IntoIter { self.raw.into_iter().skip(self.cap() - self.len()) }
+}
+
 impl<const LEN: usize> core::fmt::Write for astr<LEN> {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         if !s.is_ascii() {

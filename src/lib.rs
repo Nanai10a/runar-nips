@@ -2,6 +2,7 @@
 #![feature(array_chunks)]
 #![feature(cell_update)]
 #![feature(generic_arg_infer)]
+#![feature(impl_trait_in_assoc_type)]
 #![feature(iter_array_chunks)]
 #![feature(lazy_cell)]
 #![feature(never_type)]

@@ -2,7 +2,7 @@
 pub struct FixedVec<T, const LEN: usize>([Option<T>; LEN]);
 
 impl<const LEN: usize, T> FixedVec<T, LEN> {
-    pub fn new() -> Self { Self([(); _].map(|()| None)) }
+    pub fn new() -> Self { Self(core::array::from_fn(|_| None)) }
 
     pub fn len(&self) -> usize {
         self.0

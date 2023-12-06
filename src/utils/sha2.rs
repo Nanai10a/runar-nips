@@ -186,3 +186,31 @@ impl<'a> Iterator for PadLen<'a> {
         }
     }
 }
+
+#[test]
+fn test() {
+    use crate::base::u256;
+    use crate::utils::ToAstr;
+
+    macro assert_eq_hash($bytes_ref:expr, $hash:expr,) {
+        assert_eq! {
+            u256::from_be_bytes(sha2_256($bytes_ref.iter().copied())).to_astr().as_str(),
+            $hash
+        };
+    }
+
+    assert_eq_hash! {
+        b"",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    };
+
+    assert_eq_hash! {
+        b"abc",
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    };
+
+    assert_eq_hash! {
+        b"k1ANJ/6TiGuRtWSqI1GwujUqwMajX4srw3HM1T3Th2WQ1d7Ad//RxqSSyhc6kQ6Aa8s23KGdZC46",
+        "6ddc612f6179fd101e86ae815f58d95e95e49a4a05eec887a0a3b1ea83dccf99",
+    };
+}

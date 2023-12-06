@@ -17,6 +17,8 @@ impl<const LEN: usize> astr<LEN> {
     pub fn cap(&self) -> usize { LEN }
 
     pub fn len(&self) -> usize { self.len }
+
+    pub fn is_empty(&self) -> bool { self.len == 0 }
 }
 
 impl<const LEN: usize> core::fmt::Write for astr<LEN> {
